@@ -29,7 +29,7 @@ return;
 async Task HandleShowTimer(Crystal1D crystal1D)
 {
     var period = TimeSpan.FromSeconds(1);
-    var totalTime = TimeSpan.FromSeconds(6);
+    var totalTime = TimeSpan.FromSeconds(60);
     var timerState = new TimerState();
     var timer = new Timer(
         s =>
