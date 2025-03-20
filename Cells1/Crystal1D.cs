@@ -53,11 +53,10 @@ public sealed class Crystal1D
         {
             tasks[i] = Task.Run(() => StartBrownianMotionForAtom(cancellationToken), cancellationToken);
         }
-        return Task.Run(async () =>
-        {
-            await Task.WhenAll(tasks);
-            IsRunning = false;
-        }, cancellationToken);
+        
+        // In order not to throw TaskCancelledException.
+        // ReSharper disable once MethodSupportsCancellation
+        return Task.WhenAll(tasks).ContinueWith(_ => IsRunning = false);
     }
 
     private Task StartBrownianMotionForAtom(CancellationToken cancellationToken)
