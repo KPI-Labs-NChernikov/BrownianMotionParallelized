@@ -17,19 +17,19 @@ var crystal = new Crystal1D(n, k, p);
 Presenter.ShowCrystal(crystal);
 
 var cancellationTokenSource = new CancellationTokenSource();
-var motionTask = crystal.StartBrownianMotion(cancellationTokenSource.Token);
+var modellingTime = TimeSpan.FromSeconds(60);
+var motionTask = crystal.StartBrownianMotion(modellingTime, cancellationTokenSource.Token);
 
-await HandleShowTimer(crystal);
+await HandleShowTimer(crystal, modellingTime);
 
-cancellationTokenSource.Cancel();
+//cancellationTokenSource.Cancel();     // Necessary only for Timeout.InfiniteTimeSpan
 await motionTask;
 
 return;
 
-async Task HandleShowTimer(Crystal1D crystal1D)
+async Task HandleShowTimer(Crystal1D crystal1D, TimeSpan totalTime)
 {
     var period = TimeSpan.FromSeconds(1);
-    var totalTime = TimeSpan.FromSeconds(60);
     var timerState = new TimerState();
     var timer = new Timer(
         s =>

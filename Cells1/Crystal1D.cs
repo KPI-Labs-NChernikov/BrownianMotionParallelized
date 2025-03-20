@@ -40,7 +40,7 @@ public sealed class Crystal1D
         _isTouched = false;
     }
 
-    public Task StartBrownianMotion(CancellationToken cancellationToken)
+    public Task StartBrownianMotion(TimeSpan modellingTime, CancellationToken cancellationToken)
     {
         if (_isTouched)
         {
@@ -51,7 +51,7 @@ public sealed class Crystal1D
         var tasks = new Task[_k];
         for (var i = 0; i < _k; i++)
         {
-            tasks[i] = Task.Run(() => StartBrownianMotionForAtom(cancellationToken), cancellationToken);
+            tasks[i] = Task.Run(() => StartBrownianMotionForAtom(modellingTime, cancellationToken), cancellationToken);
         }
         
         // In order not to throw TaskCancelledException.
@@ -59,10 +59,13 @@ public sealed class Crystal1D
         return Task.WhenAll(tasks).ContinueWith(_ => IsRunning = false);
     }
 
-    private Task StartBrownianMotionForAtom(CancellationToken cancellationToken)
+    private Task StartBrownianMotionForAtom(TimeSpan modellingTime, CancellationToken cancellationToken)
     {
         var cellIndex = 0;
-        while (!cancellationToken.IsCancellationRequested)
+        var startTime = DateTime.Now;
+        while (!cancellationToken.IsCancellationRequested 
+               && (DateTime.Now - startTime < modellingTime 
+                    || modellingTime == Timeout.InfiniteTimeSpan))
         {
             var m = Random.Shared.NextDouble();
             if (m > _p)
