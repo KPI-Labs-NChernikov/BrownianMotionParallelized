@@ -25,7 +25,7 @@ public sealed class Crystal1D
         _p = p;
     }
 
-    public void Reset()
+    public void Reset()     // Execute only after any BrownianMotion is stopped.
     {
         if (IsRunning)
         {
