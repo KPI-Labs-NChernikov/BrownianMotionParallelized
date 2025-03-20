@@ -2,8 +2,8 @@
 using Cells1;
 using Microsoft.Extensions.Configuration;
 
-Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("en-US");
 IConfiguration configuration = new ConfigurationBuilder()
     .AddCommandLine(args)
     .Build();
