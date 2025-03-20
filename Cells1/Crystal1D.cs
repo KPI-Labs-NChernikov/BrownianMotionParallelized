@@ -47,26 +47,37 @@ public sealed class Crystal1D
             throw new InvalidOperationException("Reset the crystal first.");
         }
         _isTouched =  true;
-        IsRunning = true;
-        var tasks = new Task[_k];
-        for (var i = 0; i < _k; i++)
-        {
-            tasks[i] = Task.Run(() => StartBrownianMotionForAtom(modellingTime, cancellationToken), cancellationToken);
-        }
         
-        // In order not to throw TaskCancelledException.
-        // ReSharper disable once MethodSupportsCancellation
-        return Task.WhenAll(tasks).ContinueWith(_ => IsRunning = false);
+        return Task.Run(async () =>
+        {
+            try
+            {
+                IsRunning = true;
+                
+                var tasks = new Task[_k];
+                for (var i = 0; i < _k; i++)
+                {
+                    tasks[i] = Task.Run(
+                        () => StartBrownianMotionForAtom(modellingTime, cancellationToken),
+                        cancellationToken);
+                }
+
+                await Task.WhenAll(tasks);
+            }
+            finally
+            {
+                IsRunning = false;
+            }
+        }, cancellationToken);
     }
 
     private Task StartBrownianMotionForAtom(TimeSpan modellingTime, CancellationToken cancellationToken)
     {
         var cellIndex = 0;
         var startTime = DateTime.Now;
-        while (!cancellationToken.IsCancellationRequested 
-               && (DateTime.Now - startTime < modellingTime 
-                    || modellingTime == Timeout.InfiniteTimeSpan))
+        while (DateTime.Now - startTime < modellingTime || modellingTime == Timeout.InfiniteTimeSpan)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             var m = Random.Shared.NextDouble();
             if (m > _p)
             {
@@ -90,6 +101,7 @@ public sealed class Crystal1D
                 cellIndex--;
             }
         }
+        
         return Task.CompletedTask;
     }
 

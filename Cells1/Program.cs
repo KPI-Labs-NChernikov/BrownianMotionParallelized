@@ -18,12 +18,19 @@ Presenter.ShowCrystal(crystal);
 
 var cancellationTokenSource = new CancellationTokenSource();
 var modellingTime = TimeSpan.FromSeconds(60);
-var motionTask = crystal.StartBrownianMotion(modellingTime, cancellationTokenSource.Token);
+try
+{
+    var motionTask = crystal.StartBrownianMotion(modellingTime, cancellationTokenSource.Token);
 
-await HandleShowTimer(crystal, modellingTime);
-
-//cancellationTokenSource.Cancel();     // Necessary only for Timeout.InfiniteTimeSpan
-await motionTask;
+    await HandleShowTimer(crystal, modellingTime);
+    
+    //cancellationTokenSource.Cancel(); // Necessary only for Timeout.InfiniteTimeSpan
+    await motionTask;
+}
+catch (OperationCanceledException ex)
+{
+    Console.WriteLine(ex);
+}
 
 return;
 
